@@ -591,6 +591,89 @@ def delete_all_kontrahenci():
     return redirect(url_for('kontrahenci'))
 
 
+@app.route('/kontrahenci/export-brakujace')
+def kontrahenci_export_brakujace():
+    """Export CSV of contractors missing contact data for their chosen communication method."""
+    contractors = Kontrahent.query.order_by(Kontrahent.nazwa).all()
+    brakujace = []
+    for k in contractors:
+        if k.metoda_kontaktu == 'email' and not k.email:
+            brakujace.append(k)
+        elif k.metoda_kontaktu == 'sms' and not k.telefon:
+            brakujace.append(k)
+
+    if not brakujace:
+        flash('Wszyscy kontrahenci mają uzupełnione dane kontaktowe.', 'info')
+        return redirect(url_for('kontrahenci'))
+
+    output = io.StringIO()
+    output.write('\ufeff')
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(['NIP', 'Nazwa', 'Metoda kontaktu', 'E-mail', 'Telefon'])
+    for k in brakujace:
+        writer.writerow([
+            k.nip,
+            k.nazwa or '',
+            k.metoda_kontaktu,
+            k.email or '',
+            k.telefon or '',
+        ])
+
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8-sig')),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'kontrahenci_do_uzupelnienia_{date.today().isoformat()}.csv'
+    )
+
+
+@app.route('/kontrahenci/import-kontakty', methods=['POST'])
+def kontrahenci_import_kontakty():
+    """Import CSV with updated contact data for contractors."""
+    file = request.files.get('file')
+    if not file or not file.filename.endswith('.csv'):
+        flash('Proszę wybrać plik CSV.', 'danger')
+        return redirect(url_for('kontrahenci'))
+
+    try:
+        content = file.read().decode('utf-8-sig')
+        try:
+            dialect = csv.Sniffer().sniff(content[:2000], delimiters='\t;,')
+            delimiter = dialect.delimiter
+        except csv.Error:
+            delimiter = ';'
+
+        reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
+        if reader.fieldnames:
+            reader.fieldnames = [f.strip().lstrip('\ufeff') for f in reader.fieldnames]
+
+        updated = 0
+        for row in reader:
+            row = {k.strip(): (v.strip() if v else '') for k, v in row.items()}
+            nip = row.get('NIP', '').replace('-', '').strip()
+            if not nip:
+                continue
+            k = Kontrahent.query.filter_by(nip=nip).first()
+            if not k:
+                continue
+            email = row.get('E-mail', '').strip()
+            telefon = row.get('Telefon', '').strip()
+            if email:
+                k.email = email
+            if telefon:
+                k.telefon = telefon
+            updated += 1
+
+        db.session.commit()
+        flash(f'Zaktualizowano dane kontaktowe {updated} kontrahentów.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Błąd importu: {str(e)}', 'danger')
+
+    return redirect(url_for('kontrahenci'))
+
+
 @app.route('/kontrahenci/<int:id>/set-windykacja', methods=['POST'])
 def kontrahent_set_windykacja(id):
     kontrahent = Kontrahent.query.get_or_404(id)

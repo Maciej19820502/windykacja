@@ -7,6 +7,12 @@
     <div class="d-flex align-items-center gap-2">
         <span class="badge bg-secondary fs-6">{{ contractors|length }}</span>
         {% if contractors %}
+        <a href="{{ url_for('kontrahenci_export_brakujace') }}" class="btn btn-outline-warning btn-sm">
+            <i class="bi bi-download me-1"></i>Uzupełnij dane kontaktowe
+        </a>
+        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#importKontaktyModal">
+            <i class="bi bi-upload me-1"></i>Wczytaj dane kontaktowe
+        </button>
         <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAllKontrahenciModal">
             <i class="bi bi-trash me-1"></i>Usuń wszystkich
         </button>
@@ -102,6 +108,28 @@
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Usuń wszystkich</button>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Import danych kontaktowych -->
+<div class="modal fade" id="importKontaktyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('kontrahenci_import_kontakty') }}" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Wczytaj dane kontaktowe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">Wczytaj uzupełniony plik CSV (pobrany przyciskiem "Uzupełnij dane kontaktowe") z kolumnami: NIP, Nazwa, Metoda kontaktu, E-mail, Telefon.</p>
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-upload me-1"></i>Wczytaj</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
