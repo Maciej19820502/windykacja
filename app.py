@@ -7,7 +7,7 @@ import re
 import smtplib
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -63,6 +63,67 @@ def parse_date(s):
         except ValueError:
             continue
     raise ValueError(f'Nierozpoznany format daty: {s}')
+
+
+def parse_ksef_xml(file_content):
+    """Parse KSeF XML invoice (FA(2) or FA(3) schema). Returns dict with invoice data."""
+    NAMESPACES = [
+        'http://crd.gov.pl/wzor/2023/06/29/12648/',   # FA(2)
+        'http://crd.gov.pl/wzor/2025/06/25/13775/',    # FA(3)
+    ]
+
+    root = ET.fromstring(file_content)
+    tag = root.tag
+
+    ns = None
+    for candidate in NAMESPACES:
+        if candidate in tag:
+            ns = candidate
+            break
+
+    if ns is None:
+        raise ValueError('Nieobsługiwany schemat XML — oczekiwano FA(2) lub FA(3)')
+
+    def find(path):
+        return root.find(path, {'ns': ns})
+
+    def find_text(path):
+        el = find(path)
+        return el.text.strip() if el is not None and el.text else None
+
+    nazwa = find_text('.//ns:Podmiot1/ns:DaneIdentyfikacyjne/ns:Nazwa')
+    nip = find_text('.//ns:Podmiot1/ns:DaneIdentyfikacyjne/ns:NIP')
+    nr_faktury = find_text('.//ns:Fa/ns:P_2')
+    kwota_str = find_text('.//ns:Fa/ns:P_15')
+    waluta = find_text('.//ns:Fa/ns:KodWaluty') or 'PLN'
+    data_wystawienia_str = find_text('.//ns:Fa/ns:P_1')
+    termin_str = find_text('.//ns:Fa/ns:Platnosc/ns:TerminyPlatnosci/ns:TerminPlatnosci')
+
+    if not nr_faktury:
+        raise ValueError('Brak numeru faktury (P_2) w pliku XML')
+    if not kwota_str:
+        raise ValueError('Brak kwoty brutto (P_15) w pliku XML')
+    if not data_wystawienia_str:
+        raise ValueError('Brak daty wystawienia (P_1) w pliku XML')
+
+    kwota = float(kwota_str)
+    data_wystawienia = parse_date(data_wystawienia_str)
+
+    if termin_str:
+        termin_platnosci = parse_date(termin_str)
+    else:
+        termin_platnosci = data_wystawienia + timedelta(days=14)
+
+    return {
+        'kontrahent': nazwa or '',
+        'nip': nip or '',
+        'nr_faktury': nr_faktury,
+        'kwota': kwota,
+        'waluta': waluta,
+        'data_wystawienia': data_wystawienia,
+        'termin_platnosci': termin_platnosci,
+        'data_platnosci': None,
+    }
 
 
 def fetch_company_by_nip(nip):
@@ -1076,6 +1137,62 @@ def import_csv():
         return redirect(url_for('import_csv'))
 
     return render_template('import.html')
+
+
+@app.route('/import-ksef', methods=['POST'])
+def import_ksef():
+    files = request.files.getlist('files')
+    if not files or all(f.filename == '' for f in files):
+        flash('Proszę wybrać co najmniej jeden plik XML.', 'danger')
+        return redirect(url_for('import_csv'))
+
+    import_record = ImportHistory(nazwa_pliku=f'KSeF import ({len(files)} plików)')
+    db.session.add(import_record)
+    db.session.flush()
+
+    count = 0
+    errors = []
+
+    for f in files:
+        if not f.filename.lower().endswith('.xml'):
+            errors.append(f'{f.filename}: nie jest plikiem XML')
+            continue
+        try:
+            content = f.read()
+            data = parse_ksef_xml(content)
+
+            kontrahent_obj = None
+            if data['nip']:
+                kontrahent_obj = get_or_create_kontrahent(data['nip'])
+
+            inv = Invoice(
+                kontrahent=data['kontrahent'],
+                nr_faktury=data['nr_faktury'],
+                kwota=data['kwota'],
+                waluta=data['waluta'],
+                data_wystawienia=data['data_wystawienia'],
+                termin_platnosci=data['termin_platnosci'],
+                data_platnosci=data['data_platnosci'],
+                import_id=import_record.id,
+                kontrahent_id=kontrahent_obj.id if kontrahent_obj else None,
+            )
+            inv.oblicz_status()
+            db.session.add(inv)
+            count += 1
+        except Exception as e:
+            errors.append(f'{f.filename}: {str(e)}')
+
+    import_record.liczba_rekordow = count
+    db.session.commit()
+
+    if count:
+        flash(f'Zaimportowano {count} faktur z KSeF XML.', 'success')
+    if errors:
+        flash(f'Błędy ({len(errors)}): {"; ".join(errors[:5])}', 'warning')
+    if not count and not errors:
+        flash('Nie znaleziono plików do importu.', 'warning')
+
+    return redirect(url_for('import_csv'))
 
 
 @app.route('/download-template')

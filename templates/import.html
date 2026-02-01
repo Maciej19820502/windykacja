@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Import CSV - Windykacja{% endblock %}
+{% block title %}Import faktur - Windykacja{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0"><i class="bi bi-upload me-2"></i>Import faktur z CSV</h2>
+    <h2 class="mb-0"><i class="bi bi-upload me-2"></i>Import faktur</h2>
     <a href="{{ url_for('history') }}" class="btn btn-outline-info">
         <i class="bi bi-clock-history me-1"></i>Historia importów
     </a>
@@ -49,6 +49,47 @@
                 <ul class="small text-muted">
                     <li>Średnik (<code>;</code>), tabulator, przecinek</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">Import faktur KSeF (XML)</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('import_ksef') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="ksefFiles" class="form-label">Pliki XML z KSeF</label>
+                        <input type="file" class="form-control" id="ksefFiles" name="files" accept=".xml" multiple required>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-file-earmark-code me-1"></i>Importuj z KSeF
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">Informacje o KSeF XML</div>
+            <div class="card-body">
+                <p class="text-muted">Importuj faktury bezpośrednio z plików XML pobranych z Krajowego Systemu e-Faktur.</p>
+                <h6>Obsługiwane formaty:</h6>
+                <ul class="small text-muted">
+                    <li><strong>FA(2)</strong> — schemat z 2023 r.</li>
+                    <li><strong>FA(3)</strong> — schemat z 2025 r.</li>
+                </ul>
+                <h6>Jak pobrać XML z KSeF:</h6>
+                <ol class="small text-muted">
+                    <li>Zaloguj się do <strong>ksef.mf.gov.pl</strong></li>
+                    <li>Wyszukaj faktury zakupowe</li>
+                    <li>Pobierz wybrane faktury jako pliki XML</li>
+                    <li>Wgraj pobrane pliki powyżej</li>
+                </ol>
             </div>
         </div>
     </div>
