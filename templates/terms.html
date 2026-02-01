@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Regulamin - PayTiq{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">Regulamin serwisu PayTiq</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <h5>1. Definicje</h5>
+                <ul>
+                    <li><strong>Usługodawca</strong> — Workspace Partners Sp. z o.o. z siedzibą w Gdyni, ul. Piotrkowska 73, 81-502 Gdynia.</li>
+                    <li><strong>Aplikacja / PayTiq</strong> — aplikacja internetowa służąca do zarządzania procesem windykacji należności.</li>
+                    <li><strong>Użytkownik</strong> — osoba fizyczna, prawna lub jednostka organizacyjna korzystająca z Aplikacji.</li>
+                    <li><strong>Kontrahent</strong> — podmiot, wobec którego Użytkownik prowadzi działania windykacyjne za pośrednictwem Aplikacji.</li>
+                </ul>
+
+                <h5>2. Zakres usługi</h5>
+                <p>Aplikacja PayTiq umożliwia:</p>
+                <ul>
+                    <li>Import i zarządzanie fakturami (CSV, KSeF XML)</li>
+                    <li>Automatyczną weryfikację statusu VAT kontrahentów</li>
+                    <li>Zarządzanie procedurą windykacyjną w 5 etapach</li>
+                    <li>Wysyłkę korespondencji windykacyjnej drogą e-mail i SMS</li>
+                    <li>Prowadzenie historii korespondencji</li>
+                    <li>Konfigurację szablonów wiadomości w trzech wariantach intensywności</li>
+                </ul>
+
+                <h5>3. Warunki korzystania</h5>
+                <p>Użytkownik zobowiązuje się do:</p>
+                <ul>
+                    <li>Korzystania z Aplikacji zgodnie z obowiązującym prawem, w szczególności z przepisami o ochronie danych osobowych (RODO)</li>
+                    <li>Podawania prawdziwych i aktualnych danych</li>
+                    <li>Nieudostępniania danych dostępowych osobom nieupoważnionym</li>
+                    <li>Wykorzystywania Aplikacji wyłącznie w celu zgodnego z prawem dochodzenia należności</li>
+                </ul>
+
+                <h5>4. Odpowiedzialność</h5>
+                <ul>
+                    <li>Usługodawca dokłada starań, aby Aplikacja działała prawidłowo i bez przerw, jednakże nie gwarantuje nieprzerwanej dostępności usługi.</li>
+                    <li>Usługodawca nie ponosi odpowiedzialności za treść korespondencji windykacyjnej redagowanej i wysyłanej przez Użytkownika.</li>
+                    <li>Użytkownik ponosi pełną odpowiedzialność za zgodność prowadzonych działań windykacyjnych z obowiązującym prawem.</li>
+                    <li>Usługodawca nie ponosi odpowiedzialności za szkody wynikające z nieprawidłowej konfiguracji usług zewnętrznych (SMTP, SMSAPI) przez Użytkownika.</li>
+                </ul>
+
+                <h5>5. Dane osobowe</h5>
+                <p>Zasady przetwarzania danych osobowych określa <a href="{{ url_for('privacy') }}">Polityka prywatności</a>. Użytkownik, wprowadzając dane kontrahentów do Aplikacji, oświadcza, że posiada podstawę prawną do ich przetwarzania w celach windykacyjnych.</p>
+
+                <h5>6. Przerwy techniczne</h5>
+                <p>Usługodawca zastrzega sobie prawo do czasowych przerw w działaniu Aplikacji wynikających z konieczności przeprowadzenia prac konserwacyjnych, aktualizacji lub napraw.</p>
+
+                <h5>7. Reklamacje</h5>
+                <p>Reklamacje dotyczące działania Aplikacji należy zgłaszać na adres siedziby Usługodawcy. Reklamacje będą rozpatrywane w terminie 14 dni roboczych od daty ich otrzymania.</p>
+
+                <h5>8. Postanowienia końcowe</h5>
+                <ul>
+                    <li>Usługodawca zastrzega sobie prawo do zmiany niniejszego Regulaminu. O zmianach Użytkownik zostanie poinformowany za pośrednictwem Aplikacji.</li>
+                    <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego.</li>
+                    <li>Wszelkie spory wynikające z korzystania z Aplikacji będą rozstrzygane przez sąd właściwy dla siedziby Usługodawcy.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

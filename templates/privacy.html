@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Polityka prywatności - PayTiq{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">Polityka prywatności</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <h5>1. Administrator danych osobowych</h5>
+                <p>Administratorem danych osobowych jest Workspace Partners Sp. z o.o. z siedzibą w Gdyni, ul. Piotrkowska 73, 81-502 Gdynia (dalej: „Administrator").</p>
+
+                <h5>2. Zakres zbieranych danych</h5>
+                <p>W ramach korzystania z aplikacji PayTiq przetwarzamy następujące dane:</p>
+                <ul>
+                    <li>Dane kontrahentów: nazwa firmy, NIP, adres, adres e-mail, numer telefonu</li>
+                    <li>Dane faktur: numery faktur, kwoty, daty wystawienia i terminy płatności</li>
+                    <li>Dane konfiguracyjne: ustawienia SMTP, tokeny API</li>
+                    <li>Dane korespondencji: treści wysłanych wiadomości e-mail i SMS</li>
+                </ul>
+
+                <h5>3. Cele przetwarzania danych</h5>
+                <p>Dane osobowe przetwarzane są w następujących celach:</p>
+                <ul>
+                    <li>Świadczenie usług windykacji należności (zarządzanie fakturami, wysyłka korespondencji windykacyjnej)</li>
+                    <li>Weryfikacja statusu VAT kontrahentów za pośrednictwem API Ministerstwa Finansów i GUS REGON</li>
+                    <li>Prowadzenie korespondencji e-mail i SMS z kontrahentami</li>
+                    <li>Zapewnienie prawidłowego funkcjonowania aplikacji</li>
+                </ul>
+
+                <h5>4. Podstawy prawne przetwarzania (RODO)</h5>
+                <p>Przetwarzanie danych odbywa się na podstawie:</p>
+                <ul>
+                    <li><strong>Art. 6 ust. 1 lit. b RODO</strong> — przetwarzanie jest niezbędne do wykonania umowy o świadczenie usług</li>
+                    <li><strong>Art. 6 ust. 1 lit. f RODO</strong> — prawnie uzasadniony interes Administratora polegający na dochodzeniu należności</li>
+                    <li><strong>Art. 6 ust. 1 lit. c RODO</strong> — wypełnienie obowiązków prawnych ciążących na Administratorze</li>
+                </ul>
+
+                <h5>5. Okres przechowywania danych</h5>
+                <p>Dane przechowywane są przez okres korzystania z aplikacji oraz przez okres wymagany przepisami prawa podatkowego i rachunkowego, nie krócej niż 5 lat od końca roku kalendarzowego, w którym powstał obowiązek podatkowy.</p>
+
+                <h5>6. Odbiorcy danych</h5>
+                <p>Dane mogą być przekazywane następującym kategoriom odbiorców:</p>
+                <ul>
+                    <li>Dostawcy usług e-mail (serwery SMTP skonfigurowane przez użytkownika)</li>
+                    <li>SMSAPI.pl — w zakresie wysyłki wiadomości SMS</li>
+                    <li>Ministerstwo Finansów — w zakresie weryfikacji statusu VAT (API Wykaz podatników VAT)</li>
+                    <li>GUS — w zakresie weryfikacji danych rejestrowych (API REGON)</li>
+                </ul>
+
+                <h5>7. Prawa użytkowników</h5>
+                <p>Zgodnie z RODO przysługują Państwu następujące prawa:</p>
+                <ul>
+                    <li>Prawo dostępu do danych (art. 15 RODO)</li>
+                    <li>Prawo do sprostowania danych (art. 16 RODO)</li>
+                    <li>Prawo do usunięcia danych (art. 17 RODO)</li>
+                    <li>Prawo do ograniczenia przetwarzania (art. 18 RODO)</li>
+                    <li>Prawo do przenoszenia danych (art. 20 RODO)</li>
+                    <li>Prawo do sprzeciwu wobec przetwarzania (art. 21 RODO)</li>
+                    <li>Prawo do wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych</li>
+                </ul>
+
+                <h5>8. Bezpieczeństwo danych</h5>
+                <p>Administrator stosuje odpowiednie środki techniczne i organizacyjne zapewniające ochronę przetwarzanych danych osobowych, w szczególności zabezpieczenia przed nieuprawnionym dostępem, utratą lub zniszczeniem.</p>
+
+                <h5>9. Kontakt</h5>
+                <p>W sprawach dotyczących ochrony danych osobowych prosimy o kontakt:</p>
+                <p>
+                    Workspace Partners Sp. z o.o.<br>
+                    ul. Piotrkowska 73, 81-502 Gdynia
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

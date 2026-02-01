@@ -1388,12 +1388,21 @@ def kontrahent_set_kontakt(id):
 @app.route('/kontrahenci/<int:id>/edit', methods=['POST'])
 def kontrahent_edit(id):
     kontrahent = Kontrahent.query.get_or_404(id)
+    nowy_nip = request.form.get('nip', '').strip()
+    if nowy_nip and nowy_nip != kontrahent.nip:
+        istniejacy = Kontrahent.query.filter(Kontrahent.nip == nowy_nip, Kontrahent.id != id).first()
+        if istniejacy:
+            flash(f'Kontrahent z NIP {nowy_nip} już istnieje.', 'danger')
+            return redirect(url_for('kontrahent_detail', id=id))
+        kontrahent.nip = nowy_nip
+    kontrahent.nazwa = request.form.get('nazwa', '').strip() or None
+    kontrahent.adres = request.form.get('adres', '').strip() or None
     kontrahent.sciezka_windykacji = request.form.get('sciezka_windykacji', 'STANDARDOWA')
     kontrahent.metoda_kontaktu = request.form.get('metoda_kontaktu', 'email')
     kontrahent.email = request.form.get('email', '').strip() or None
     kontrahent.telefon = request.form.get('telefon', '').strip() or None
     db.session.commit()
-    flash(f'Zaktualizowano ustawienia kontrahenta "{kontrahent.nazwa or kontrahent.nip}".', 'success')
+    flash(f'Zaktualizowano dane kontrahenta "{kontrahent.nazwa or kontrahent.nip}".', 'success')
     return redirect(url_for('kontrahent_detail', id=id))
 
 
@@ -1698,7 +1707,7 @@ def test_email():
     if not to:
         flash('Podaj adres e-mail do testu.', 'danger')
         return redirect(url_for('konfiguracja'))
-    success, error = send_email(to, 'Test Windykacja — konfiguracja SMTP', 'To jest wiadomość testowa z systemu Windykacja.\n\nJeśli ją widzisz, konfiguracja SMTP działa poprawnie.')
+    success, error = send_email(to, 'Test PayTiq — konfiguracja SMTP', 'To jest wiadomość testowa z systemu PayTiq.\n\nJeśli ją widzisz, konfiguracja SMTP działa poprawnie.')
     if success:
         flash(f'E-mail testowy wysłany do {to}.', 'success')
     else:
@@ -1712,12 +1721,22 @@ def test_sms():
     if not to:
         flash('Podaj numer telefonu do testu.', 'danger')
         return redirect(url_for('konfiguracja'))
-    success, error = send_sms(to, 'Test Windykacja: konfiguracja SMSAPI dziala poprawnie.')
+    success, error = send_sms(to, 'Test PayTiq: konfiguracja SMSAPI dziala poprawnie.')
     if success:
         flash(f'SMS testowy wysłany do {to}.', 'success')
     else:
         flash(f'Błąd wysyłki SMS: {error}', 'danger')
     return redirect(url_for('konfiguracja'))
+
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
 
 
 if __name__ == '__main__':
