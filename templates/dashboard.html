@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Windykacja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center">
+                <div class="text-muted mb-1"><i class="bi bi-receipt"></i> Wszystkie faktury</div>
+                <div class="display-6">{{ stats.total_count }}</div>
+                <div class="text-muted">{{ "%.2f"|format(stats.total_amount) }} PLN</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100 border-start border-success border-4">
+            <div class="card-body text-center">
+                <div class="text-muted mb-1"><i class="bi bi-check-circle"></i> Opłacone</div>
+                <div class="display-6 text-success">{{ stats.paid_count }}</div>
+                <div class="text-muted">{{ "%.2f"|format(stats.paid_amount) }} PLN</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100 border-start border-warning border-4">
+            <div class="card-body text-center">
+                <div class="text-muted mb-1"><i class="bi bi-hourglass-split"></i> W terminie</div>
+                <div class="display-6 text-warning">{{ stats.ontime_count }}</div>
+                <div class="text-muted">{{ "%.2f"|format(stats.ontime_amount) }} PLN</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100 border-start border-danger border-4">
+            <div class="card-body text-center">
+                <div class="text-muted mb-1"><i class="bi bi-exclamation-triangle"></i> Przeterminowane</div>
+                <div class="display-6 text-danger">{{ stats.overdue_count }}</div>
+                <div class="text-muted">{{ "%.2f"|format(stats.overdue_amount) }} PLN</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-pie-chart me-1"></i>Struktura faktur wg statusu</div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-bar-chart me-1"></i>Zaległości wg kategorii</div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="agingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if exchange_info %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body py-2 px-3 d-flex align-items-center">
+                <i class="bi bi-currency-exchange me-2 text-primary"></i>
+                <small class="text-muted">
+                    Kursy NBP ({{ rates_date }}):
+                    {% for code, rate in exchange_info.items() %}
+                        <strong>{{ code }}</strong> = {{ "%.4f"|format(rate) }} PLN{{ "," if not loop.last }}
+                    {% endfor %}
+                    &mdash; wszystkie kwoty przeliczone na PLN
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-people me-1"></i>Top 5 dłużników</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Kontrahent</th>
+                            <th class="text-end">Kwota zaległości (PLN)</th>
+                            <th class="text-end">Liczba faktur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in top_debtors %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ d.kontrahent }}</td>
+                            <td class="text-end fw-bold text-danger">{{ "%.2f"|format(d.total) }}</td>
+                            <td class="text-end">{{ d.count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted py-3">Brak danych</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Opłacone', 'W terminie', 'Przeterminowane'],
+            datasets: [{
+                data: [{{ "%.2f"|format(stats.paid_amount) }}, {{ "%.2f"|format(stats.ontime_amount) }}, {{ "%.2f"|format(stats.overdue_amount) }}],
+                backgroundColor: ['#198754', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.label + ': ' + ctx.parsed.toLocaleString('pl-PL', {minimumFractionDigits: 2}) + ' PLN';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const agingCtx = document.getElementById('agingChart').getContext('2d');
+    new Chart(agingCtx, {
+        type: 'bar',
+        data: {
+            labels: ['W terminie', '1-30 dni', '31-60 dni', '61-90 dni', '90+ dni'],
+            datasets: [{
+                label: 'Kwota (PLN)',
+                data: [
+                    {{ aging.w_terminie }},
+                    {{ aging.d1_30 }},
+                    {{ aging.d31_60 }},
+                    {{ aging.d61_90 }},
+                    {{ aging.d90plus }}
+                ],
+                backgroundColor: ['#ffc107', '#ffe0b2', '#ffcc80', '#ffab91', '#ef9a9a']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.parsed.y.toLocaleString('pl-PL', {minimumFractionDigits: 2}) + ' PLN';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(v) { return v.toLocaleString('pl-PL') + ' PLN'; }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

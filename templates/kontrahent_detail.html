@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}{{ kontrahent.nazwa or kontrahent.nip }} - Windykacja{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('kontrahenci') }}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Powrót do listy
+    </a>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-building me-2"></i>{{ kontrahent.nazwa or 'Brak nazwy' }}</h4>
+            <form method="POST" action="{{ url_for('kontrahent_refresh', id=kontrahent.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-success" title="Odśwież dane z API MF">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Odśwież dane
+                </button>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">NIP:</th>
+                            <td><code>{{ kontrahent.nip }}</code></td>
+                        </tr>
+                        <tr>
+                            <th>Nazwa:</th>
+                            <td>{{ kontrahent.nazwa or '—' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Adres:</th>
+                            <td>{{ kontrahent.adres or '—' }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 180px;">Status VAT:</th>
+                            <td>
+                                {% if kontrahent.status_vat == 'Czynny' %}
+                                    <span class="badge bg-success">{{ kontrahent.status_vat }}</span>
+                                {% elif kontrahent.status_vat %}
+                                    <span class="badge bg-warning text-dark">{{ kontrahent.status_vat }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">brak danych</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Ostatnie sprawdzenie:</th>
+                            <td>{{ kontrahent.data_sprawdzenia.strftime('%Y-%m-%d %H:%M') if kontrahent.data_sprawdzenia else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Liczba faktur:</th>
+                            <td><span class="badge bg-primary">{{ invoices|length }}</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Ustawienia windykacji i kontaktu</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('kontrahent_edit', id=kontrahent.id) }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Ścieżka windykacji</label>
+                    <select name="sciezka_windykacji" class="form-select">
+                        {% for val, label, color in [('OSTRA','OSTRA','danger'), ('STANDARDOWA','STANDARDOWA','primary'), ('LEKKA','LEKKA','info'), ('BRAK','BRAK','secondary')] %}
+                        <option value="{{ val }}" {{ 'selected' if kontrahent.sciezka_windykacji == val }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Metoda kontaktu</label>
+                    <select name="metoda_kontaktu" class="form-select">
+                        <option value="email" {{ 'selected' if kontrahent.metoda_kontaktu == 'email' }}>E-mail</option>
+                        <option value="sms" {{ 'selected' if kontrahent.metoda_kontaktu == 'sms' }}>SMS</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Adres e-mail</label>
+                    <input type="email" name="email" class="form-control" value="{{ kontrahent.email or '' }}" placeholder="kontakt@firma.pl">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Numer telefonu</label>
+                    <input type="tel" name="telefon" class="form-control" value="{{ kontrahent.telefon or '' }}" placeholder="+48 600 000 000">
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Zapisz ustawienia
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h5 class="mb-3"><i class="bi bi-receipt me-2"></i>Faktury kontrahenta</h5>
+
+{% if invoices %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nr faktury</th>
+                <th>Kwota</th>
+                <th>Waluta</th>
+                <th>Data wystawienia</th>
+                <th>Termin płatności</th>
+                <th>Data płatności</th>
+                <th>Dni różnica</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr>
+                <td>{{ inv.nr_faktury }}</td>
+                <td class="text-end">{{ '%.2f'|format(inv.kwota) }}</td>
+                <td>{{ inv.waluta }}</td>
+                <td>{{ inv.data_wystawienia.strftime('%Y-%m-%d') }}</td>
+                <td>{{ inv.termin_platnosci.strftime('%Y-%m-%d') }}</td>
+                <td>{{ inv.data_platnosci.strftime('%Y-%m-%d') if inv.data_platnosci else '—' }}</td>
+                <td>
+                    {% if inv.dni_roznica > 0 %}
+                        <span class="text-danger fw-bold">+{{ inv.dni_roznica }}</span>
+                    {% else %}
+                        <span class="text-success">{{ inv.dni_roznica }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if inv.status == 'oplacona' %}
+                        <span class="badge bg-success">Opłacona</span>
+                    {% elif inv.status == 'w_terminie' %}
+                        <span class="badge bg-info">W terminie</span>
+                    {% elif inv.status == 'przeterminowana' %}
+                        <span class="badge bg-danger">Przeterminowana</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>Brak faktur przypisanych do tego kontrahenta.
+</div>
+{% endif %}
+{% endblock %}

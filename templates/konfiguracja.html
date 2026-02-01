@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Konfiguracja - Windykacja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-gear me-2"></i>Konfiguracja</h2>
+
+<!-- Profil firmy -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Profil firmy</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="section" value="profil">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Nazwa firmy</label>
+                    <input type="text" name="firma_nazwa" class="form-control" value="{{ cfg.firma_nazwa }}" placeholder="Np. Moja Firma Sp. z o.o.">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">NIP</label>
+                    <input type="text" name="firma_nip" class="form-control" value="{{ cfg.firma_nip }}" placeholder="0000000000">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Adres</label>
+                    <input type="text" name="firma_adres" class="form-control" value="{{ cfg.firma_adres }}" placeholder="ul. Przykładowa 1, 00-000 Warszawa">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Osoba odpowiedzialna</label>
+                    <input type="text" name="firma_osoba" class="form-control" value="{{ cfg.firma_osoba }}" placeholder="Jan Kowalski">
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz profil</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Konfiguracja e-mail -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Konfiguracja e-mail (SMTP)</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="section" value="email">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Serwer SMTP</label>
+                    <input type="text" name="email_smtp_host" class="form-control" value="{{ cfg.email_smtp_host }}" placeholder="smtp.gmail.com">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Port</label>
+                    <input type="text" name="email_smtp_port" class="form-control" value="{{ cfg.email_smtp_port }}" placeholder="587">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">SSL/TLS</label>
+                    <select name="email_smtp_ssl" class="form-select">
+                        <option value="tak" {{ 'selected' if cfg.email_smtp_ssl == 'tak' }}>Tak</option>
+                        <option value="nie" {{ 'selected' if cfg.email_smtp_ssl == 'nie' }}>Nie</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Adres nadawcy</label>
+                    <input type="email" name="email_from" class="form-control" value="{{ cfg.email_from }}" placeholder="windykacja@firma.pl">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Login SMTP</label>
+                    <input type="text" name="email_smtp_user" class="form-control" value="{{ cfg.email_smtp_user }}" placeholder="user@firma.pl">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Hasło SMTP</label>
+                    <input type="password" name="email_smtp_pass" class="form-control" value="{{ cfg.email_smtp_pass }}" placeholder="********">
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz e-mail</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Konfiguracja SMSAPI -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-phone me-2"></i>Konfiguracja SMSAPI.pl</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="section" value="smsapi">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Token API</label>
+                    <input type="text" name="smsapi_token" class="form-control font-monospace" value="{{ cfg.smsapi_token }}" placeholder="Wklej token z panelu SMSAPI.pl">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Nazwa nadawcy (pole FROM)</label>
+                    <input type="text" name="smsapi_from" class="form-control" value="{{ cfg.smsapi_from }}" placeholder="Np. MojaFirma">
+                    <div class="form-text">Musi być zarejestrowana w panelu SMSAPI.</div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz SMSAPI</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

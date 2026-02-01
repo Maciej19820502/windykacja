@@ -1,0 +1,80 @@
+body {
+    background-color: #f4f6f9;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.stat-card {
+    transition: transform 0.15s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-card .display-6 {
+    font-weight: 700;
+}
+
+.table th {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.row-oplacona {
+    background-color: #d1e7dd !important;
+}
+
+.row-w-terminie {
+    background-color: #fff3cd !important;
+}
+
+.row-1-30 {
+    background-color: #ffe0b2 !important;
+}
+
+.row-31-60 {
+    background-color: #ffcc80 !important;
+}
+
+.row-61-90 {
+    background-color: #ffab91 !important;
+}
+
+.row-90plus {
+    background-color: #ef9a9a !important;
+}
+
+.badge-oplacona {
+    background-color: #198754;
+}
+
+.badge-w-terminie {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-przeterminowana {
+    background-color: #dc3545;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.filter-section {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}

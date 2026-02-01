@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Kontrahenci - Windykacja{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-building me-2"></i>Kontrahenci</h2>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-secondary fs-6">{{ contractors|length }}</span>
+        {% if contractors %}
+        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAllKontrahenciModal">
+            <i class="bi bi-trash me-1"></i>Usuń wszystkich
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+{% if contractors %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>NIP</th>
+                <th>Nazwa</th>
+                <th>Adres</th>
+                <th>Status VAT</th>
+                <th>Windykacja</th>
+                <th>Kontakt</th>
+                <th>Liczba faktur</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in contractors %}
+            <tr>
+                <td><code>{{ c.obj.nip }}</code></td>
+                <td>{{ c.obj.nazwa or '—' }}</td>
+                <td><small>{{ c.obj.adres or '—' }}</small></td>
+                <td>
+                    {% if c.obj.status_vat == 'Czynny' %}
+                        <span class="badge bg-success">{{ c.obj.status_vat }}</span>
+                    {% elif c.obj.status_vat %}
+                        <span class="badge bg-warning text-dark">{{ c.obj.status_vat }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">brak danych</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('kontrahent_set_windykacja', id=c.obj.id) }}" class="d-inline">
+                        <select name="sciezka_windykacji" class="form-select form-select-sm windykacja-select"
+                                data-current="{{ c.obj.sciezka_windykacji or 'STANDARDOWA' }}"
+                                onchange="this.form.submit()" style="min-width: 140px;">
+                            <option value="OSTRA" {{ 'selected' if c.obj.sciezka_windykacji == 'OSTRA' }}>OSTRA</option>
+                            <option value="STANDARDOWA" {{ 'selected' if c.obj.sciezka_windykacji == 'STANDARDOWA' }}>STANDARDOWA</option>
+                            <option value="LEKKA" {{ 'selected' if c.obj.sciezka_windykacji == 'LEKKA' }}>LEKKA</option>
+                            <option value="BRAK" {{ 'selected' if c.obj.sciezka_windykacji == 'BRAK' }}>BRAK</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('kontrahent_set_kontakt', id=c.obj.id) }}" class="d-inline">
+                        <select name="metoda_kontaktu" class="form-select form-select-sm kontakt-select"
+                                onchange="this.form.submit()" style="min-width: 110px;">
+                            <option value="email" {{ 'selected' if c.obj.metoda_kontaktu == 'email' }}>E-mail</option>
+                            <option value="sms" {{ 'selected' if c.obj.metoda_kontaktu == 'sms' }}>SMS</option>
+                        </select>
+                    </form>
+                </td>
+                <td><span class="badge bg-primary">{{ c.invoice_count }}</span></td>
+                <td class="text-nowrap">
+                    <a href="{{ url_for('kontrahent_detail', id=c.obj.id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('delete_kontrahent', id=c.obj.id) }}" class="d-inline" onsubmit="return confirm('Usunąć kontrahenta {{ c.obj.nazwa or c.obj.nip }}?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>Brak kontrahentów. Zaimportuj faktury z kolumną NIP, aby automatycznie utworzyć kontrahentów.
+</div>
+{% endif %}
+
+<!-- Modal: Usuń wszystkich kontrahentów -->
+<div class="modal fade" id="deleteAllKontrahenciModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Potwierdzenie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć <strong>wszystkich kontrahentów</strong> ({{ contractors|length }})? Faktury nie zostaną usunięte, jedynie odpięte od kontrahentów.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form method="POST" action="{{ url_for('delete_all_kontrahenci') }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Usuń wszystkich</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function styleSelect(sel) {
+    const colors = {OSTRA:'#dc3545', STANDARDOWA:'#0d6efd', LEKKA:'#0dcaf0', BRAK:'#6c757d'};
+    const textColors = {OSTRA:'#fff', STANDARDOWA:'#fff', LEKKA:'#000', BRAK:'#fff'};
+    const val = sel.value;
+    sel.style.backgroundColor = colors[val] || '#6c757d';
+    sel.style.color = textColors[val] || '#fff';
+    sel.style.fontWeight = '600';
+    sel.style.fontSize = '0.8rem';
+}
+document.querySelectorAll('.windykacja-select').forEach(styleSelect);
+
+function styleKontakt(sel) {
+    const colors = {email:'#198754', sms:'#6f42c1'};
+    sel.style.backgroundColor = colors[sel.value] || '#6c757d';
+    sel.style.color = '#fff';
+    sel.style.fontWeight = '600';
+    sel.style.fontSize = '0.8rem';
+}
+document.querySelectorAll('.kontakt-select').forEach(styleKontakt);
+</script>
+{% endblock %}

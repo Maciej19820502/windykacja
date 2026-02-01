@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Import CSV - Windykacja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-upload me-2"></i>Import faktur z CSV</h2>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">Wgraj plik CSV</div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label">Plik CSV (separator: średnik)</label>
+                        <input type="file" class="form-control" id="csvFile" name="file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload me-1"></i>Importuj
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">Wzorzec pliku</div>
+            <div class="card-body">
+                <p class="text-muted">Pobierz wzorzec CSV z przykładowymi danymi i uzupełnij go własnymi fakturami.</p>
+                <a href="{{ url_for('download_template') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-download me-1"></i>Pobierz wzorzec CSV
+                </a>
+                <hr>
+                <h6>Wymagane kolumny:</h6>
+                <ul class="small text-muted">
+                    <li><strong>Kontrahent</strong> - nazwa firmy</li>
+                    <li><strong>Nr faktury</strong> - numer faktury</li>
+                    <li><strong>Kwota</strong> - kwota (np. 5000.00)</li>
+                    <li><strong>Waluta</strong> - kod waluty (np. PLN, EUR, USD; domyślnie PLN)</li>
+                    <li><strong>Data wystawienia</strong> - format YYYY-MM-DD lub DD.MM.YYYY</li>
+                    <li><strong>Termin platnosci</strong> - format YYYY-MM-DD lub DD.MM.YYYY</li>
+                    <li><strong>Data platnosci</strong> - format YYYY-MM-DD lub DD.MM.YYYY (puste = nieopłacona)</li>
+                </ul>
+                <h6>Obsługiwane separatory:</h6>
+                <ul class="small text-muted">
+                    <li>Średnik (<code>;</code>), tabulator, przecinek</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

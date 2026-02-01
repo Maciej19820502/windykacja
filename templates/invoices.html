@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Faktury - Windykacja{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-receipt me-2"></i>Lista faktur</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('export_invoices', **request.args) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-download me-1"></i>Eksport CSV
+        </a>
+        {% if invoices %}
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAllInvoicesModal">
+            <i class="bi bi-trash me-1"></i>Usuń wszystkie
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="filter-section">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Kontrahent</label>
+            <input type="text" name="kontrahent" class="form-control" value="{{ filters.kontrahent }}" placeholder="Szukaj...">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">Wszystkie</option>
+                <option value="oplacona" {{ 'selected' if filters.status == 'oplacona' }}>Opłacone</option>
+                <option value="nieoplacona" {{ 'selected' if filters.status == 'nieoplacona' }}>Nieopłacone</option>
+                <option value="przeterminowana" {{ 'selected' if filters.status == 'przeterminowana' }}>Przeterminowane</option>
+                <option value="w_terminie" {{ 'selected' if filters.status == 'w_terminie' }}>W terminie</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Data od</label>
+            <input type="date" name="data_od" class="form-control" value="{{ filters.data_od }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Data do</label>
+            <input type="date" name="data_do" class="form-control" value="{{ filters.data_do }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filtruj</button>
+        </div>
+        <div class="col-md-1">
+            <a href="{{ url_for('invoices') }}" class="btn btn-outline-secondary w-100">Reset</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        {% set sort_dir = 'desc' if sort_order == 'asc' else 'asc' %}
+                        {% for col, label in [('kontrahent', 'Kontrahent'), ('nr_faktury', 'Nr faktury'), ('kwota', 'Kwota'), ('waluta', 'Waluta'), ('data_wystawienia', 'Data wyst.'), ('termin_platnosci', 'Termin'), ('data_platnosci', 'Zapłacono'), ('dni_roznica', 'Dni'), ('status', 'Status'), (None, '')] %}
+                        <th>
+                            {% if col %}
+                            <a href="{{ url_for('invoices', sort=col, order=sort_dir if sort_by == col else 'asc', **filters) }}" class="text-white text-decoration-none">
+                                {{ label }}
+                                {% if sort_by == col %}
+                                <i class="bi bi-caret-{{ 'up' if sort_order == 'asc' else 'down' }}-fill"></i>
+                                {% endif %}
+                            </a>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    {% set kat = inv.kategoria_zaleglosci %}
+                    <tr class="{% if kat == 'oplacona' %}row-oplacona{% elif kat == 'w_terminie' %}row-w-terminie{% elif kat == '1-30' %}row-1-30{% elif kat == '31-60' %}row-31-60{% elif kat == '61-90' %}row-61-90{% elif kat == '90+' %}row-90plus{% endif %}">
+                        <td>{{ inv.kontrahent }}</td>
+                        <td>{{ inv.nr_faktury }}</td>
+                        <td class="text-end">{{ "%.2f"|format(inv.kwota) }}</td>
+                        <td>{{ inv.waluta }}</td>
+                        <td>{{ inv.data_wystawienia.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ inv.termin_platnosci.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ inv.data_platnosci.strftime('%Y-%m-%d') if inv.data_platnosci else '-' }}</td>
+                        <td class="text-end">{{ inv.dni_roznica }}</td>
+                        <td>
+                            <span class="badge badge-{{ inv.status }}">
+                                {% if inv.status == 'oplacona' %}Opłacona{% elif inv.status == 'w_terminie' %}W terminie{% else %}Przeterminowana{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('delete_invoice', id=inv.id) }}" class="d-inline" onsubmit="return confirm('Usunąć fakturę {{ inv.nr_faktury }}?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="10" class="text-center text-muted py-4">Brak faktur. <a href="{{ url_for('import_csv') }}">Importuj dane</a>.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-2 text-muted">Wyświetlono {{ invoices|length }} faktur</div>
+
+<!-- Modal: Usuń wszystkie faktury -->
+<div class="modal fade" id="deleteAllInvoicesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Potwierdzenie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć <strong>wszystkie faktury</strong> ({{ invoices|length }})? Tej operacji nie można cofnąć.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form method="POST" action="{{ url_for('delete_all_invoices') }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Usuń wszystkie</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

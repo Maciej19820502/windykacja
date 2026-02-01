@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Historia importów - Windykacja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-clock-history me-2"></i>Historia importów</h2>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Nazwa pliku</th>
+                    <th>Data importu</th>
+                    <th>Liczba rekordów</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for imp in imports %}
+                <tr>
+                    <td>{{ imp.id }}</td>
+                    <td>{{ imp.nazwa_pliku }}</td>
+                    <td>{{ imp.data_importu.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ imp.liczba_rekordow }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete_import', id=imp.id) }}" class="d-inline" onsubmit="return confirm('Usunąć import i wszystkie powiązane faktury?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Usuń
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">Brak historii importów.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

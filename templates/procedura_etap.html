@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Etap {{ etap }} – {{ info.nazwa }} - Windykacja{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('procedura') }}" class="btn btn-outline-secondary btn-sm mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Powrót do procedury
+</a>
+
+<div class="d-flex align-items-center mb-4">
+    <div class="rounded-circle bg-{{ info.kolor }} {{ 'text-white' if info.kolor != 'warning' else 'text-dark' }} d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+        <i class="bi {{ info.ikona }}"></i>
+    </div>
+    <div>
+        <h2 class="mb-0">Etap {{ etap }} – {{ info.nazwa }}</h2>
+        <p class="text-muted mb-0">{{ info.opis }}</p>
+    </div>
+</div>
+
+{% if etap == 1 %}
+<div class="alert alert-info small">
+    <i class="bi bi-info-circle me-1"></i>
+    W etapie 1 komunikacja jest generowana <strong>indywidualnie dla każdej faktury</strong> (zarówno e-mail jak i SMS).
+</div>
+{% else %}
+<div class="alert alert-info small">
+    <i class="bi bi-info-circle me-1"></i>
+    W etapach 2–5 o przejściu do etapu decyduje <strong>najstarszy rozrachunek</strong>.
+    E-mail zawiera tabelę zbiorczą zobowiązań, SMS – łączną wartość rozrachunków.
+</div>
+{% endif %}
+
+<!-- Tabs: warianty -->
+<ul class="nav nav-tabs" role="tablist">
+    {% for w in warianty %}
+    {% set badge_color = {'LEKKA':'info','STANDARDOWA':'primary','OSTRA':'danger','BRAK':'secondary'}[w] %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-tab btn btn-sm m-1 {% if loop.first %}active{% endif %} btn-{{ 'outline-' if not loop.first }}{{ badge_color }}"
+                data-bs-toggle="tab" data-bs-target="#tab-{{ w }}" type="button" role="tab">
+            {{ w }}
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content mt-3">
+    {% for w in warianty %}
+    {% set badge_color = {'LEKKA':'info','STANDARDOWA':'primary','OSTRA':'danger','BRAK':'secondary'}[w] %}
+    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="tab-{{ w }}" role="tabpanel">
+
+        {% if w == 'BRAK' %}
+        <div class="alert alert-secondary">
+            <i class="bi bi-slash-circle me-1"></i>Wariant BRAK oznacza brak komunikacji na tym etapie. Kontrahenci z tym wariantem nie otrzymają żadnych wiadomości.
+        </div>
+        {% endif %}
+
+        <div class="row g-4">
+            {% for k in kanaly %}
+            {% set szablon = szablony[w][k] %}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>
+                            {% if k == 'email' %}
+                                <i class="bi bi-envelope me-1"></i>E-mail
+                            {% else %}
+                                <i class="bi bi-phone me-1"></i>SMS
+                            {% endif %}
+                            <span class="badge bg-{{ badge_color }} ms-1">{{ w }}</span>
+                        </span>
+                        {% if szablon and szablon.tresc %}
+                            <span class="badge bg-success">Skonfigurowany</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Pusty</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('procedura_etap_save', etap=etap) }}">
+                            <input type="hidden" name="wariant" value="{{ w }}">
+                            <input type="hidden" name="kanal" value="{{ k }}">
+
+                            {% if k == 'email' %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Tytuł wiadomości</label>
+                                <input type="text" name="tytul" class="form-control form-control-sm"
+                                       value="{{ szablon.tytul if szablon else '' }}"
+                                       placeholder="Temat e-mail..." {% if w == 'BRAK' %}disabled{% endif %}>
+                            </div>
+                            {% else %}
+                            <input type="hidden" name="tytul" value="">
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">
+                                    {% if k == 'email' %}Treść wiadomości{% else %}Treść SMS{% endif %}
+                                </label>
+                                <textarea name="tresc" class="form-control form-control-sm font-monospace"
+                                          rows="{{ 12 if k == 'email' else 4 }}"
+                                          placeholder="{% if k == 'sms' %}Max 160 znaków na segment SMS...{% else %}Treść e-mail...{% endif %}"
+                                          {% if w == 'BRAK' %}disabled{% endif %}>{{ szablon.tresc if szablon else '' }}</textarea>
+                                {% if k == 'sms' %}
+                                <div class="form-text"><span class="sms-counter" data-target="tresc">0</span> znaków</div>
+                                {% endif %}
+                            </div>
+
+                            {% if w != 'BRAK' %}
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Zapisz
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('textarea[name="tresc"]').forEach(function(ta) {
+    const counter = ta.closest('form').querySelector('.sms-counter');
+    if (counter) {
+        function update() { counter.textContent = ta.value.length; }
+        ta.addEventListener('input', update);
+        update();
+    }
+});
+</script>
+{% endblock %}
