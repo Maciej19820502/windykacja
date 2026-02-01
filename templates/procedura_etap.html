@@ -29,6 +29,55 @@
 </div>
 {% endif %}
 
+<!-- Przycisk instrukcji tagów -->
+<button class="btn btn-outline-primary btn-sm mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#instrukcjaTagi">
+    <i class="bi bi-braces me-1"></i>Instrukcja stosowania tagów
+</button>
+<div class="collapse mb-3" id="instrukcjaTagi">
+    <div class="card card-body">
+        <h6 class="fw-bold mb-2">Dostępne tagi</h6>
+        <p class="small text-muted mb-3">Wstaw tagi w treści szablonu — zostaną automatycznie zastąpione danymi przy generowaniu wiadomości. Kliknij tag, aby skopiować go do schowka.</p>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h6 class="small fw-bold text-primary">Dane faktury</h6>
+                <table class="table table-sm small mb-0">
+                    <tr><td><code class="tag-copy" role="button">{nr_faktury}</code></td><td>Numer faktury, np. <em>FV/2025/001</em></td></tr>
+                    <tr><td><code class="tag-copy" role="button">{kwota}</code></td><td>Kwota faktury z walutą, np. <em>5 000,00 PLN</em></td></tr>
+                    <tr><td><code class="tag-copy" role="button">{waluta}</code></td><td>Kod waluty, np. <em>PLN</em>, <em>EUR</em></td></tr>
+                    <tr><td><code class="tag-copy" role="button">{data_wystawienia}</code></td><td>Data wystawienia faktury</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{termin_platnosci}</code></td><td>Termin płatności</td></tr>
+                </table>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6 class="small fw-bold text-primary">Dane kontrahenta (odbiorcy)</h6>
+                <table class="table table-sm small mb-0">
+                    <tr><td><code class="tag-copy" role="button">{kontrahent_nazwa}</code></td><td>Nazwa firmy kontrahenta</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{kontrahent_adres}</code></td><td>Adres kontrahenta</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{kontrahent_nip}</code></td><td>NIP kontrahenta</td></tr>
+                </table>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6 class="small fw-bold text-primary">Dane firmy (nadawcy) i zbiorcze</h6>
+                <table class="table table-sm small mb-0">
+                    <tr><td><code class="tag-copy" role="button">{firma_nazwa}</code></td><td>Nazwa Twojej firmy</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{firma_adres}</code></td><td>Adres Twojej firmy</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{firma_nip}</code></td><td>NIP Twojej firmy</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{firma_osoba}</code></td><td>Osoba odpowiedzialna</td></tr>
+                    <tr><td><code class="tag-copy" role="button">{suma_zobowiazan}</code></td><td>Łączna suma wszystkich zobowiązań z rozbiciem na waluty, np. <em>12 500,00 PLN, 3 200,00 EUR</em></td></tr>
+                    <tr><td><code class="tag-copy" role="button">{suma_przeterminowanych}</code></td><td>Suma tylko przeterminowanych zobowiązań z rozbiciem na waluty, np. <em>8 750,25 PLN</em></td></tr>
+                    <tr><td><code class="tag-copy" role="button">{tabela_zobowiazan}</code></td><td>Tabela zbiorcza (tylko e-mail, etapy 2–5)</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="alert alert-warning small mb-0 mt-2">
+            <i class="bi bi-lightbulb me-1"></i><strong>Uwaga:</strong>
+            Tag <code>{tabela_zobowiazan}</code> działa tylko w szablonach e-mail dla etapów 2–5 — generuje tabelę HTML z rozbiciem na zobowiązania przeterminowane (od najstarszego) i nieprzeterminowane.
+            W SMS użyj <code>{suma_zobowiazan}</code> (łączna kwota) i <code>{suma_przeterminowanych}</code> (tylko przeterminowane).
+            Wszystkie kwoty są zawsze prezentowane z rozbiciem na waluty (np. <em>12 500,00 PLN, 3 200,00 EUR</em>).
+        </div>
+    </div>
+</div>
+
 <!-- Tabs: warianty -->
 <ul class="nav nav-tabs" role="tablist">
     {% for w in warianty %}
@@ -120,6 +169,19 @@
 
 {% block scripts %}
 <script>
+document.querySelectorAll('.tag-copy').forEach(function(el) {
+    el.style.cursor = 'pointer';
+    el.title = 'Kliknij, aby skopiować';
+    el.addEventListener('click', function() {
+        navigator.clipboard.writeText(el.textContent).then(function() {
+            var orig = el.textContent;
+            el.textContent = 'Skopiowano!';
+            el.classList.add('text-success');
+            setTimeout(function() { el.textContent = orig; el.classList.remove('text-success'); }, 1000);
+        });
+    });
+});
+
 document.querySelectorAll('textarea[name="tresc"]').forEach(function(ta) {
     const counter = ta.closest('form').querySelector('.sms-counter');
     if (counter) {

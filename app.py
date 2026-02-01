@@ -179,7 +179,7 @@ DOMYSLNE_SZABLONY = {
     },
     (2, 'LEKKA', 'sms'): {
         'tytul': '',
-        'tresc': 'Przypominamy o zaległej FV {nr_faktury} ({kwota} {waluta}, termin: {termin_platnosci}). Łączne zobowiązania: {suma_zobowiazan}. {firma_nazwa}',
+        'tresc': 'Przypominamy o zaległej FV {nr_faktury} ({kwota} {waluta}, termin: {termin_platnosci}). Łączne zobowiązania: {suma_zobowiazan}, w tym przeterminowane: {suma_przeterminowanych}. {firma_nazwa}',
     },
     (2, 'STANDARDOWA', 'email'): {
         'tytul': 'Przypomnienie o nieuregulowanej płatności – {kontrahent_nazwa}',
@@ -187,7 +187,7 @@ DOMYSLNE_SZABLONY = {
     },
     (2, 'STANDARDOWA', 'sms'): {
         'tytul': '',
-        'tresc': 'Zaległa FV {nr_faktury} ({kwota} {waluta}, po terminie od {termin_platnosci}). Łączne zaległości: {suma_zobowiazan}. Prosimy o pilną wpłatę. {firma_nazwa}',
+        'tresc': 'Zaległa FV {nr_faktury} ({kwota} {waluta}, po terminie od {termin_platnosci}). Łączne zobowiązania: {suma_zobowiazan}, w tym przeterminowane: {suma_przeterminowanych}. Prosimy o pilną wpłatę. {firma_nazwa}',
     },
     (2, 'OSTRA', 'email'): {
         'tytul': 'ZALEGŁOŚĆ PŁATNICZA – wezwanie do uregulowania – {kontrahent_nazwa}',
@@ -195,7 +195,7 @@ DOMYSLNE_SZABLONY = {
     },
     (2, 'OSTRA', 'sms'): {
         'tytul': '',
-        'tresc': 'ZALEGŁOŚĆ: FV {nr_faktury} ({kwota} {waluta}) po terminie od {termin_platnosci}. Łączne zaległości: {suma_zobowiazan}. Wymagana natychmiastowa wpłata. {firma_nazwa}',
+        'tresc': 'ZALEGŁOŚĆ: FV {nr_faktury} ({kwota} {waluta}) po terminie od {termin_platnosci}. Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wymagana natychmiastowa wpłata. {firma_nazwa}',
     },
     (2, 'BRAK', 'email'): {'tytul': '', 'tresc': ''},
     (2, 'BRAK', 'sms'): {'tytul': '', 'tresc': ''},
@@ -207,7 +207,7 @@ DOMYSLNE_SZABLONY = {
     },
     (3, 'LEKKA', 'sms'): {
         'tytul': '',
-        'tresc': 'Monit: FV {nr_faktury} ({kwota} {waluta}) nieopłacona od {termin_platnosci}. Łączne zaległości: {suma_zobowiazan}. Prosimy o kontakt. {firma_nazwa}',
+        'tresc': 'Monit: FV {nr_faktury} ({kwota} {waluta}) nieopłacona od {termin_platnosci}. Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Prosimy o kontakt. {firma_nazwa}',
     },
     (3, 'STANDARDOWA', 'email'): {
         'tytul': 'MONIT PŁATNOŚCI – {kontrahent_nazwa}',
@@ -215,7 +215,7 @@ DOMYSLNE_SZABLONY = {
     },
     (3, 'STANDARDOWA', 'sms'): {
         'tytul': '',
-        'tresc': 'MONIT: FV {nr_faktury} ({kwota} {waluta}) przeterminowana od {termin_platnosci}. Zaległości łącznie: {suma_zobowiazan}. Prosimy o wpłatę w 7 dni. {firma_nazwa}',
+        'tresc': 'MONIT: FV {nr_faktury} ({kwota} {waluta}) przeterminowana od {termin_platnosci}. Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wpłata w 7 dni. {firma_nazwa}',
     },
     (3, 'OSTRA', 'email'): {
         'tytul': 'MONIT – PILNE WEZWANIE DO ZAPŁATY – {kontrahent_nazwa}',
@@ -223,7 +223,7 @@ DOMYSLNE_SZABLONY = {
     },
     (3, 'OSTRA', 'sms'): {
         'tytul': '',
-        'tresc': 'MONIT PILNY: FV {nr_faktury} ({kwota} {waluta}) przeterminowana. Łączne zaległości: {suma_zobowiazan}. Brak wpłaty w 5 dni = windykacja. {firma_nazwa}',
+        'tresc': 'MONIT PILNY: FV {nr_faktury} ({kwota} {waluta}) przeterminowana. Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Brak wpłaty w 5 dni = windykacja. {firma_nazwa}',
     },
     (3, 'BRAK', 'email'): {'tytul': '', 'tresc': ''},
     (3, 'BRAK', 'sms'): {'tytul': '', 'tresc': ''},
@@ -235,7 +235,7 @@ DOMYSLNE_SZABLONY = {
     },
     (4, 'LEKKA', 'sms'): {
         'tytul': '',
-        'tresc': 'Wezwanie do zapłaty: FV {nr_faktury} ({kwota} {waluta}). Łączne zobowiązania: {suma_zobowiazan}. Termin: 7 dni. {firma_nazwa}',
+        'tresc': 'Wezwanie do zapłaty: FV {nr_faktury} ({kwota} {waluta}). Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Termin: 7 dni. {firma_nazwa}',
     },
     (4, 'STANDARDOWA', 'email'): {
         'tytul': 'WEZWANIE DO ZAPŁATY – {kontrahent_nazwa}',
@@ -243,7 +243,7 @@ DOMYSLNE_SZABLONY = {
     },
     (4, 'STANDARDOWA', 'sms'): {
         'tytul': '',
-        'tresc': 'WEZWANIE DO ZAPŁATY: FV {nr_faktury} ({kwota} {waluta}), termin minął {termin_platnosci}. Zaległości: {suma_zobowiazan}. Wpłata w 7 dni lub postępowanie sądowe. {firma_nazwa}',
+        'tresc': 'WEZWANIE DO ZAPŁATY: FV {nr_faktury} ({kwota} {waluta}), termin minął {termin_platnosci}. Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wpłata w 7 dni lub sąd. {firma_nazwa}',
     },
     (4, 'OSTRA', 'email'): {
         'tytul': 'WEZWANIE DO ZAPŁATY – OSTATECZNE OSTRZEŻENIE – {kontrahent_nazwa}',
@@ -251,7 +251,7 @@ DOMYSLNE_SZABLONY = {
     },
     (4, 'OSTRA', 'sms'): {
         'tytul': '',
-        'tresc': 'OSTATNIE OSTRZEŻENIE: FV {nr_faktury} ({kwota} {waluta}). Zaległości: {suma_zobowiazan}. Wpłata w 5 dni lub sprawa sądowa + koszty. {firma_nazwa}',
+        'tresc': 'OSTATNIE OSTRZEŻENIE: FV {nr_faktury} ({kwota} {waluta}). Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wpłata w 5 dni lub sąd + koszty. {firma_nazwa}',
     },
     (4, 'BRAK', 'email'): {'tytul': '', 'tresc': ''},
     (4, 'BRAK', 'sms'): {'tytul': '', 'tresc': ''},
@@ -263,7 +263,7 @@ DOMYSLNE_SZABLONY = {
     },
     (5, 'LEKKA', 'sms'): {
         'tytul': '',
-        'tresc': 'Ostateczne wezwanie przedsądowe: FV {nr_faktury} ({kwota} {waluta}). Zaległości: {suma_zobowiazan}. Wpłata w 7 dni lub postępowanie sądowe. {firma_nazwa}',
+        'tresc': 'Ostateczne wezwanie przedsądowe: FV {nr_faktury} ({kwota} {waluta}). Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wpłata w 7 dni lub sąd. {firma_nazwa}',
     },
     (5, 'STANDARDOWA', 'email'): {
         'tytul': 'OSTATECZNE PRZEDSĄDOWE WEZWANIE DO ZAPŁATY – {kontrahent_nazwa}',
@@ -271,7 +271,7 @@ DOMYSLNE_SZABLONY = {
     },
     (5, 'STANDARDOWA', 'sms'): {
         'tytul': '',
-        'tresc': 'OSTATECZNE WEZWANIE PRZEDSĄDOWE: FV {nr_faktury} ({kwota} {waluta}). Zaległości: {suma_zobowiazan}. Wpłata w 5 dni roboczych lub sprawa trafia do sądu. {firma_nazwa}',
+        'tresc': 'OSTATECZNE WEZWANIE PRZEDSĄDOWE: FV {nr_faktury} ({kwota} {waluta}). Zobowiązania: {suma_zobowiazan}, przeterminowane: {suma_przeterminowanych}. Wpłata w 5 dni lub sąd. {firma_nazwa}',
     },
     (5, 'OSTRA', 'email'): {
         'tytul': 'OSTATECZNE PRZEDSĄDOWE WEZWANIE DO ZAPŁATY – {kontrahent_nazwa}',
@@ -279,7 +279,7 @@ DOMYSLNE_SZABLONY = {
     },
     (5, 'OSTRA', 'sms'): {
         'tytul': '',
-        'tresc': 'OSTATECZNE WEZWANIE PRZEDSĄDOWE: FV {nr_faktury} ({kwota} {waluta}). Zaległości: {suma_zobowiazan}. Wpłata w 3 dni lub sąd + BIG + pełne koszty. {firma_nazwa}',
+        'tresc': 'OSTATECZNE WEZWANIE PRZEDSĄDOWE! Zaległości: {suma_przeterminowanych}. Łącznie: {suma_zobowiazan}. Wpłata w 3 dni lub sąd + BIG + pełne koszty. {firma_nazwa}',
     },
     (5, 'BRAK', 'email'): {'tytul': '', 'tresc': ''},
     (5, 'BRAK', 'sms'): {'tytul': '', 'tresc': ''},
