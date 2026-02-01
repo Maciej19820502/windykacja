@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Korespondencja #{{ item.id }} - Windykacja{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('korespondencja_list') }}" class="btn btn-outline-secondary btn-sm mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Powrót do listy
+</a>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="bi bi-mailbox me-2"></i>Korespondencja #{{ item.id }}</h4>
+        {% if item.status == 'wyslana' %}
+            <span class="badge bg-success fs-6">Wysłana</span>
+        {% else %}
+            <span class="badge bg-danger fs-6">Błąd</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width:180px;">Kontrahent:</th>
+                        <td>
+                            <a href="{{ url_for('kontrahent_detail', id=item.kontrahent_id) }}">
+                                {{ item.kontrahent_rel.nazwa or item.kontrahent_rel.nip }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Data wysłania:</th>
+                        <td>{{ item.data_wyslania.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Odbiorca:</th>
+                        <td><code>{{ item.odbiorca or '—' }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Kanał:</th>
+                        <td>
+                            {% if item.kanal == 'email' %}
+                                <i class="bi bi-envelope me-1"></i>E-mail
+                            {% else %}
+                                <i class="bi bi-phone me-1"></i>SMS
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width:180px;">Etap:</th>
+                        <td>
+                            <span class="badge bg-{{ etapy_info[item.etap].kolor }}">
+                                <i class="bi {{ etapy_info[item.etap].ikona }} me-1"></i>Etap {{ item.etap }}
+                            </span>
+                            <small class="text-muted ms-2">{{ etapy_info[item.etap].nazwa }}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Wariant:</th>
+                        <td>
+                            {% if item.wariant == 'OSTRA' %}
+                                <span class="badge bg-danger">OSTRA</span>
+                            {% elif item.wariant == 'STANDARDOWA' %}
+                                <span class="badge bg-primary">STANDARDOWA</span>
+                            {% elif item.wariant == 'LEKKA' %}
+                                <span class="badge bg-info">LEKKA</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ item.wariant }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if item.invoice_rel %}
+                    <tr>
+                        <th>Faktura:</th>
+                        <td>{{ item.invoice_rel.nr_faktury }} ({{ '%.2f'|format(item.invoice_rel.kwota) }} {{ item.invoice_rel.waluta }})</td>
+                    </tr>
+                    {% endif %}
+                    {% if item.blad_opis %}
+                    <tr>
+                        <th>Opis błędu:</th>
+                        <td><span class="text-danger">{{ item.blad_opis }}</span></td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {% if item.tytul %}
+        <h6 class="fw-bold">Temat:</h6>
+        <div class="border rounded p-3 mb-3 bg-light">
+            {{ item.tytul }}
+        </div>
+        {% endif %}
+
+        <h6 class="fw-bold">Treść:</h6>
+        <div class="border rounded p-3 bg-white">
+            {% if item.kanal == 'email' %}
+                {{ item.tresc|safe }}
+            {% else %}
+                <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ item.tresc }}</pre>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

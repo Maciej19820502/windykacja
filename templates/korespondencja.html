@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Korespondencja - Windykacja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-mailbox me-2"></i>Korespondencja</h2>
+
+<!-- Filtry -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Kontrahent</label>
+                <select name="kontrahent_id" class="form-select">
+                    <option value="">— wszyscy —</option>
+                    {% for k in kontrahenci %}
+                    <option value="{{ k.id }}" {{ 'selected' if filters.kontrahent_id == k.id|string }}>{{ k.nazwa or k.nip }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Etap</label>
+                <select name="etap" class="form-select">
+                    <option value="">— wszystkie —</option>
+                    {% for nr in range(1, 6) %}
+                    <option value="{{ nr }}" {{ 'selected' if filters.etap == nr|string }}>Etap {{ nr }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Kanał</label>
+                <select name="kanal" class="form-select">
+                    <option value="">— wszystkie —</option>
+                    <option value="email" {{ 'selected' if filters.kanal == 'email' }}>E-mail</option>
+                    <option value="sms" {{ 'selected' if filters.kanal == 'sms' }}>SMS</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">— wszystkie —</option>
+                    <option value="wyslana" {{ 'selected' if filters.status == 'wyslana' }}>Wysłana</option>
+                    <option value="blad" {{ 'selected' if filters.status == 'blad' }}>Błąd</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel me-1"></i>Filtruj</button>
+                <a href="{{ url_for('korespondencja_list') }}" class="btn btn-outline-secondary">Wyczyść</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabela -->
+{% if items %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Data wysłania</th>
+                <th>Kontrahent</th>
+                <th>Etap</th>
+                <th>Wariant</th>
+                <th>Kanał</th>
+                <th>Odbiorca</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.data_wyslania.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('kontrahent_detail', id=item.kontrahent_id) }}">
+                        {{ item.kontrahent_rel.nazwa or item.kontrahent_rel.nip }}
+                    </a>
+                </td>
+                <td>
+                    <span class="badge bg-{{ etapy_info[item.etap].kolor }}">
+                        <i class="bi {{ etapy_info[item.etap].ikona }} me-1"></i>Etap {{ item.etap }}
+                    </span>
+                </td>
+                <td>
+                    {% if item.wariant == 'OSTRA' %}
+                        <span class="badge bg-danger">OSTRA</span>
+                    {% elif item.wariant == 'STANDARDOWA' %}
+                        <span class="badge bg-primary">STANDARDOWA</span>
+                    {% elif item.wariant == 'LEKKA' %}
+                        <span class="badge bg-info">LEKKA</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ item.wariant }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.kanal == 'email' %}
+                        <i class="bi bi-envelope me-1"></i>E-mail
+                    {% else %}
+                        <i class="bi bi-phone me-1"></i>SMS
+                    {% endif %}
+                </td>
+                <td><small>{{ item.odbiorca or '—' }}</small></td>
+                <td>
+                    {% if item.status == 'wyslana' %}
+                        <span class="badge bg-success">Wysłana</span>
+                    {% else %}
+                        <span class="badge bg-danger" title="{{ item.blad_opis or '' }}">Błąd</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('korespondencja_detail', id=item.id) }}" class="btn btn-sm btn-outline-secondary" title="Podgląd">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>Brak korespondencji spełniającej kryteria filtrowania.
+</div>
+{% endif %}
+{% endblock %}

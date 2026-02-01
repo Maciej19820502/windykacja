@@ -53,6 +53,25 @@ class SzablonKomunikacji(db.Model):
     )
 
 
+class Korespondencja(db.Model):
+    __tablename__ = 'korespondencja'
+    id = db.Column(db.Integer, primary_key=True)
+    kontrahent_id = db.Column(db.Integer, db.ForeignKey('kontrahenci.id'), nullable=False)
+    invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=True)
+    etap = db.Column(db.Integer, nullable=False)
+    wariant = db.Column(db.String(20), nullable=False)
+    kanal = db.Column(db.String(10), nullable=False)
+    tytul = db.Column(db.String(500), nullable=True)
+    tresc = db.Column(db.Text, nullable=True)
+    data_wyslania = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='wyslana')  # wyslana / blad
+    blad_opis = db.Column(db.Text, nullable=True)
+    odbiorca = db.Column(db.String(255), nullable=True)
+
+    kontrahent_rel = db.relationship('Kontrahent', backref=db.backref('korespondencja', lazy='dynamic'))
+    invoice_rel = db.relationship('Invoice', backref=db.backref('korespondencja', lazy='dynamic'))
+
+
 class ImportHistory(db.Model):
     __tablename__ = 'import_history'
     id = db.Column(db.Integer, primary_key=True)

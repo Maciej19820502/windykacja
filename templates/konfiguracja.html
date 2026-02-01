@@ -76,6 +76,9 @@
             </div>
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz e-mail</button>
+                <button type="button" class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#testEmailModal">
+                    <i class="bi bi-send me-1"></i>Test e-mail
+                </button>
             </div>
         </form>
     </div>
@@ -102,8 +105,83 @@
             </div>
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz SMSAPI</button>
+                <button type="button" class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#testSmsModal">
+                    <i class="bi bi-send me-1"></i>Test SMS
+                </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Konfiguracja GUS REGON -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-database me-2"></i>GUS REGON API</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="section" value="gus">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Klucz API (produkcyjny)</label>
+                    <input type="text" name="gus_api_key" class="form-control font-monospace" value="{{ cfg.gus_api_key }}" placeholder="Klucz z rejestracji na regon_bir@stat.gov.pl">
+                    <div class="form-text">Bez klucza system korzysta z trybu sandbox (dane zanonimizowane). Klucz uzyskasz wysyłając wniosek na <code>regon_bir@stat.gov.pl</code>.</div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Zapisz GUS API</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Test e-mail -->
+<div class="modal fade" id="testEmailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('test_email') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-envelope me-2"></i>Test e-mail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Adres e-mail odbiorcy</label>
+                        <input type="email" name="test_email_to" class="form-control" placeholder="test@example.com" required>
+                    </div>
+                    <p class="text-muted small">Zostanie wysłana wiadomość testowa na podany adres przy użyciu zapisanej konfiguracji SMTP.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-send me-1"></i>Wyślij test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Test SMS -->
+<div class="modal fade" id="testSmsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('test_sms') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-phone me-2"></i>Test SMS</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Numer telefonu</label>
+                        <input type="tel" name="test_sms_to" class="form-control" placeholder="+48 600 000 000" required>
+                    </div>
+                    <p class="text-muted small">Zostanie wysłany SMS testowy na podany numer przy użyciu zapisanej konfiguracji SMSAPI.pl.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-send me-1"></i>Wyślij test</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

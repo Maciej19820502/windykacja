@@ -40,13 +40,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'import_csv' %}active{% endif %}" href="{{ url_for('import_csv') }}">
-                            <i class="bi bi-upload me-1"></i>Import CSV
+                        <a class="nav-link {% if request.endpoint in ['korespondencja_list', 'korespondencja_detail'] %}active{% endif %}" href="{{ url_for('korespondencja_list') }}">
+                            <i class="bi bi-mailbox me-1"></i>Korespondencja
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
-                            <i class="bi bi-clock-history me-1"></i>Historia
+                        <a class="nav-link {% if request.endpoint in ['import_csv', 'history'] %}active{% endif %}" href="{{ url_for('import_csv') }}">
+                            <i class="bi bi-upload me-1"></i>Import CSV
                         </a>
                     </li>
                     <li class="nav-item">

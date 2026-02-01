@@ -103,6 +103,98 @@
     </div>
 </div>
 
+<!-- Wysyłka korespondencji -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-send me-2"></i>Wysyłka korespondencji</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('kontrahent_wyslij', id=kontrahent.id) }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Etap windykacji</label>
+                <select name="etap" class="form-select">
+                    {% for nr in range(1, 6) %}
+                    <option value="{{ nr }}" {{ 'selected' if nr == suggested_stage }}>
+                        Etap {{ nr }} — {{ etapy_info[nr].nazwa }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Kanał</label>
+                <input type="text" class="form-control" value="{{ kontrahent.metoda_kontaktu|upper }}" disabled>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Odbiorca</label>
+                <input type="text" class="form-control" value="{{ kontrahent.email if kontrahent.metoda_kontaktu == 'email' else kontrahent.telefon or '—' }}" disabled>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Czy na pewno wysłać korespondencję?')">
+                    <i class="bi bi-send me-1"></i>Wyślij
+                </button>
+            </div>
+        </form>
+        <div class="mt-2 small text-muted">
+            Sugerowany etap: <strong>{{ suggested_stage }}</strong> (na podstawie najstarszej przeterminowanej faktury).
+            Ścieżka: <span class="badge bg-{{ 'danger' if kontrahent.sciezka_windykacji == 'OSTRA' else 'primary' if kontrahent.sciezka_windykacji == 'STANDARDOWA' else 'info' if kontrahent.sciezka_windykacji == 'LEKKA' else 'secondary' }}">{{ kontrahent.sciezka_windykacji }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Historia korespondencji -->
+{% if korespondencja %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-mailbox me-2"></i>Historia korespondencji (ostatnie 10)</h5>
+        <a href="{{ url_for('korespondencja_list', kontrahent_id=kontrahent.id) }}" class="btn btn-sm btn-outline-primary">
+            Pokaż wszystkie
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data</th>
+                    <th>Etap</th>
+                    <th>Kanał</th>
+                    <th>Odbiorca</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for k in korespondencja %}
+                <tr>
+                    <td>{{ k.data_wyslania.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td><span class="badge bg-{{ etapy_info[k.etap].kolor }}">Etap {{ k.etap }}</span></td>
+                    <td>
+                        {% if k.kanal == 'email' %}
+                            <i class="bi bi-envelope me-1"></i>E-mail
+                        {% else %}
+                            <i class="bi bi-phone me-1"></i>SMS
+                        {% endif %}
+                    </td>
+                    <td><small>{{ k.odbiorca or '—' }}</small></td>
+                    <td>
+                        {% if k.status == 'wyslana' %}
+                            <span class="badge bg-success">Wysłana</span>
+                        {% else %}
+                            <span class="badge bg-danger">Błąd</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('korespondencja_detail', id=k.id) }}" class="btn btn-sm btn-outline-secondary" title="Szczegóły">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <h5 class="mb-3"><i class="bi bi-receipt me-2"></i>Faktury kontrahenta</h5>
 
 {% if invoices %}

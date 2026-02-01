@@ -3,12 +3,32 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-diagram-3 me-2"></i>Procedura windykacji</h2>
-    <form method="POST" action="{{ url_for('procedura_reset') }}" onsubmit="return confirm('Przywrócić wszystkie szablony do wartości domyślnych? Zmiany zostaną utracone.')">
-        <button type="submit" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>Przywróć domyślne
-        </button>
-    </form>
+    <div class="d-flex align-items-center">
+        <h2 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Procedura windykacji</h2>
+        {% if scheduler_active %}
+        <span class="badge bg-success ms-3"><i class="bi bi-check-circle me-1"></i>Scheduler aktywny</span>
+        {% else %}
+        <span class="badge bg-secondary ms-3"><i class="bi bi-x-circle me-1"></i>Scheduler nieaktywny</span>
+        {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('wyslij_automatycznie') }}" onsubmit="return confirm('Uruchomić wysyłkę dla wszystkich aktywnych etapów? Wiadomości zostaną wysłane natychmiast.')">
+            <button type="submit" class="btn btn-success btn-sm">
+                <i class="bi bi-send me-1"></i>Uruchom wysyłkę teraz
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('wyslij_automatycznie') }}" onsubmit="return confirm('UWAGA: Wysyłka BEZ kontroli powtórzeń! Wiadomości mogą zostać wysłane ponownie do tych samych rozrachunków. Kontynuować?')">
+            <input type="hidden" name="skip_duplicate_check" value="1">
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i>Anuluj brak powtórzeń — jednorazowo
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('procedura_reset') }}" onsubmit="return confirm('Przywrócić wszystkie szablony do wartości domyślnych? Zmiany zostaną utracone.')">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Przywróć domyślne
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- Opis ogólny -->
@@ -49,26 +69,68 @@
     {% for e in etapy %}
     <div class="col-12">
         <div class="card border-{{ e.info.kolor }}">
-            <div class="card-body d-flex align-items-center">
-                <div class="me-4 text-center" style="min-width: 60px;">
-                    <div class="rounded-circle bg-{{ e.info.kolor }} {{ 'text-white' if e.info.kolor != 'warning' else 'text-dark' }} d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.3rem;">
-                        <i class="bi {{ e.info.ikona }}"></i>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-4 text-center" style="min-width: 60px;">
+                        <div class="rounded-circle bg-{{ e.info.kolor }} {{ 'text-white' if e.info.kolor != 'warning' else 'text-dark' }} d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                            <i class="bi {{ e.info.ikona }}"></i>
+                        </div>
+                        <div class="small fw-bold mt-1">Etap {{ e.nr }}</div>
                     </div>
-                    <div class="small fw-bold mt-1">Etap {{ e.nr }}</div>
-                </div>
-                <div class="flex-grow-1">
-                    <h5 class="card-title mb-1">{{ e.info.nazwa }}</h5>
-                    <p class="card-text text-muted small mb-0">{{ e.info.opis }}</p>
-                </div>
-                <div class="text-end ms-3">
-                    <div class="mb-2">
-                        <span class="badge bg-success">{{ e.szablony_count }}/{{ e.szablony_total }}</span>
-                        <small class="text-muted ms-1">szablonów</small>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-1">{{ e.info.nazwa }}</h5>
+                        <p class="card-text text-muted small mb-0">{{ e.info.opis }}</p>
                     </div>
-                    <a href="{{ url_for('procedura_etap', etap=e.nr) }}" class="btn btn-outline-{{ e.info.kolor }} btn-sm">
-                        <i class="bi bi-pencil-square me-1"></i>Edytuj szablony
-                    </a>
+                    <div class="text-end ms-3">
+                        <div class="mb-2">
+                            <span class="badge bg-success">{{ e.szablony_count }}/{{ e.szablony_total }}</span>
+                            <small class="text-muted ms-1">szablonów</small>
+                        </div>
+                        <a href="{{ url_for('procedura_etap', etap=e.nr) }}" class="btn btn-outline-{{ e.info.kolor }} btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i>Edytuj szablony
+                        </a>
+                    </div>
                 </div>
+                <!-- Harmonogram -->
+                <hr class="my-3">
+                <form method="POST" action="{{ url_for('procedura_harmonogram_save', etap=e.nr) }}" class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label class="form-label small mb-0">Dzień aktywacji</label>
+                        <input type="number" name="dzien_aktywacji" class="form-control form-control-sm" style="width: 80px;"
+                               value="{{ e.harmonogram.dzien_aktywacji }}" title="Ujemny = przed terminem, dodatni = po terminie">
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label small mb-0">Godzina</label>
+                        <input type="time" name="godzina" class="form-control form-control-sm" style="width: 110px;"
+                               value="{{ e.harmonogram.godzina }}">
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label small mb-0">Dni tygodnia</label>
+                        <div class="d-flex gap-1">
+                            {% set dni_list = e.harmonogram.dni_tygodnia.split(',') %}
+                            {% set dni_nazwy = {1: 'Pn', 2: 'Wt', 3: 'Śr', 4: 'Cz', 5: 'Pt', 6: 'So', 7: 'Nd'} %}
+                            {% for d in range(1, 8) %}
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input" type="checkbox" name="dzien_{{ d }}" id="e{{ e.nr }}_d{{ d }}" value="1"
+                                       {{ 'checked' if d|string in dni_list else '' }}>
+                                <label class="form-check-label small" for="e{{ e.nr }}_d{{ d }}">{{ dni_nazwy[d] }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="aktywny" id="aktywny_{{ e.nr }}" value="1"
+                                   {{ 'checked' if e.harmonogram.aktywny == 'tak' else '' }}>
+                            <label class="form-check-label small" for="aktywny_{{ e.nr }}">Aktywny</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-save me-1"></i>Zapisz harmonogram
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
